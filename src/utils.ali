@@ -1,0 +1,25 @@
+V "GNAT Lib v6"
+P ZX
+
+RN
+RV NO_DYNAMIC_SIZED_OBJECTS
+RV NO_IMPLEMENTATION_PRAGMAS
+RV SPARK_05
+
+U utils%b		utils.adb		2c44b91c NE OO PK
+
+U utils%s		utils.ads		2f4efeaa BN EE NE OO PK
+
+D system.ads		20151123113124 6326c08a system%s
+D utils.ads		20190906054109 2f4efeaa utils%s
+D utils.adb		20190906063041 030a47b6 utils%b
+X 2 utils.ads
+3K9*Utils 10l5 10e10 3|3b14 14l5 14t10
+6E12 T 7r55 3|9r22
+7A12 Array_Type(6E12)<integer> 8r29 8r48 3|5r29 5r48 7r20
+8v13*Shuffle 8>21 3|5b13 12l8 12t15
+8*21 Arr{7A12} 3|5b21 7r31
+X 3 utils.adb
+7*14 Res{2|7A12} 8r18 9m12
+8i13 I{integer} 9r16 9r28
+
