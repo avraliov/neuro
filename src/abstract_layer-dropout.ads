@@ -1,4 +1,4 @@
-pragma Ada_2012;
+pragma Ada_2022;
   
 generic
 package Abstract_Layer.Dropout is
