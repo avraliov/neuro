@@ -17,6 +17,7 @@ package Abstract_Layer.Layer is
    function Deriv (This : in Layer) return Activate_Pack.Derivative_Type;
    function Func_Enum (This : in Layer) return Activate_Pack.Function_Enum;
    function Post_Proc (This : in Layer) return Layer_Func_Pack.Pre_Post_ProcType;
+   function Make (Num : in Natural; F : in Activate_Pack.Activate_Type := null) return Layer;
 
    procedure Make (This : out Layer; Num : in Natural; F : in Activate_Pack.Activate_Type := null);
    function Is_Transitory (This : in Layer) return Boolean
@@ -42,5 +43,16 @@ private
 
    function Is_Transitory (This : in Layer) return Boolean is
       (False);
+
+   function Make (Num : in Natural; F : in Activate_Pack.Activate_Type := null) return Layer is
+     (Layer'
+        (Num       => Num,
+         R         => <>,
+         Post_P    => <>,
+         Length    => Num,
+         Func      => F,
+         Deriv     => <>,
+         Func_Enum => <>,
+         Post_Proc => <>));
 
 end Abstract_Layer.Layer;

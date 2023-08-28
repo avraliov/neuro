@@ -1,6 +1,6 @@
 pragma Ada_2012;
 
-with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
+with Ada.Numerics.Generic_Elementary_Functions;
 
 package body Activate.Logsig is
 
@@ -9,9 +9,11 @@ package body Activate.Logsig is
    ----------
 
    function Func (Item : in Matrix_Pack.Real_Vector; Idx : Positive) return Value_Type is
+      package My_Elementary_Functions is new Ada.Numerics.Generic_Elementary_Functions (Float_Type => Value_Type);
+      use My_Elementary_Functions;
    begin
       return Result : Value_Type do
-         Result := Value_Type(1.0 / (1.0 + Exp (X => Float(-Item(Idx)))));
+         Result := Value_Type(1.0 / (1.0 + Exp (X => -Item(Idx))));
       end return;
    end Func;
 
