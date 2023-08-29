@@ -24,7 +24,12 @@ package body Activate.Softplus is
    function DerivativeFunc (Item : in Value_Type) return Value_Type is
    begin
       return Result : Value_Type do
+<<<<<<< HEAD
          Result := Value_Type(1.0 / (1.0 + Exp (X => -Item)));
+=======
+         Result := Value_Type(1.0 / (1.0 + Exp (X => Item)) *
+                              Exp (X => Item));
+>>>>>>> 4cdc2494916812a6a9a2a805d2290c7996151833
       end return;
    end DerivativeFunc;
 
