@@ -6,7 +6,7 @@ generic
    type Value_Type is digits <>;
    with package Matrix_Pack is new Ada.Numerics.Generic_Real_Arrays (Real => Value_Type);
 package Activate is
-   type Function_Enum is (None, Log, Tan, Lin, Soft_max, ReLU, Leaky_ReLU, Soft_plus, Drop);
+   type Function_Enum is (Drop, None, Log, Tan, Lin, Soft_Max, ReLU, Leaky_ReLU, Soft_Plus);
    type Routine is abstract tagged private;
    type Routine_Acc is access all Routine'Class;
 

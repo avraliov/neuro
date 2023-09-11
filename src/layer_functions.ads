@@ -7,8 +7,10 @@ generic
    with package Matrix_Pack is new Ada.Numerics.Generic_Real_Arrays (Real => Value_Type);
 package Layer_Functions is
 
-   type Pre_Post_ProcType is access procedure (Values_Arr : in out Matrix_Pack.Real_Vector; Rate : Value_Type);
+   type Pre_Post_ProcType is access procedure (Values_Arr : in out Matrix_Pack.Real_Vector);
    
-   procedure Dropout (Values_Arr : in out Matrix_Pack.Real_Vector; Rate : Value_Type);
+   generic
+      Rate : Value_Type := 0.5;
+   procedure Dropout (Values_Arr : in out Matrix_Pack.Real_Vector);
 
 end Layer_Functions;

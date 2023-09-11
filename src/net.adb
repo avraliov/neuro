@@ -246,10 +246,10 @@ package body Net is
       Normolized_Input : Input_Vector (Input'Range) := (others => Value_Type'Last);
       use Lay_Pack.Layer_Func_Pack;
    begin
-      --normolize input
+      Normolize_Input :
       for I in Input'Range loop
          Normolized_Input (I) := This.Normolize_Input (Item => Input (I));
-      end loop;
+      end loop Normolize_Input;
       -----------------
       This.Values (This.Values'First).all := Normolized_Input;
       for Values_Tensor_Index in This.Waights'Range loop
@@ -269,7 +269,7 @@ package body Net is
             --start post procedure
             if Pre_Post_Routine then
                if This.Post_Procedures (Values_Tensor_Index - 1) /= null then
-                  This.Post_Procedures (Values_Tensor_Index - 1).all (This.Values (Values_Tensor_Index - 1).all, 0.5);
+                  This.Post_Procedures (Values_Tensor_Index - 1).all (This.Values (Values_Tensor_Index - 1).all);
                end if;
             end if;
             -----------------------------

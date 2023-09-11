@@ -4,7 +4,7 @@ with Ada.Numerics.Float_Random;
 
 package body Layer_Functions is
 
-   procedure Dropout (Values_Arr : in out Matrix_Pack.Real_Vector; Rate : Value_Type) is
+   procedure Dropout (Values_Arr : in out Matrix_Pack.Real_Vector) is
       subtype Mask_Rnd is Value_Type range 0.0 .. 1.0;
       package Random renames Ada.Numerics.Float_Random;
       G : Random.Generator;

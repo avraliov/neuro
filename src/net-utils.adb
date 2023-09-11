@@ -20,4 +20,11 @@ package body Net.Utils is
       end loop Passing_Through_Waights;
    end Save_Waights;
 
+   function Get_Weights (This : in Net; Layer_Num : in Positive) return Real_Matrix is
+   begin
+      return Result : Real_Matrix := This.Waights (Layer_Num).all do
+         null;
+      end return;
+   end Get_Weights;
+
 end Net.Utils;
