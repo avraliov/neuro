@@ -106,6 +106,7 @@ package body Utils is
                     Exp  => 0);
          Ada.Text_IO.Put (File => F, Item => Delim);
       end loop;
+      Ada.Text_IO.Close (File => F);
    end Save_Array_Row;
    
    --------------------
@@ -126,6 +127,7 @@ package body Utils is
                     Exp  => 0);
          Ada.Text_IO.Put (File => F, Item => Ada.Characters.Latin_1.CR);
       end loop;
+      Ada.Text_IO.Close (File => F);
    end Save_Array_Column;
    
 end Utils;
