@@ -44,10 +44,19 @@ package Utils is
    generic
       type T is digits <>;
       type Array_Type is array (Positive range <>) of T;
-   procedure Save_Array (File_Name : String; Arr : Array_Type; Delim : Character := ' ') with
+   procedure Save_Array_Row (File_Name : String; Arr : Array_Type; Delim : Character := ' ') with
      Pre => File_Name /= "";
    -------------------------------------------
-   --Save array to file
+   --Save array to file with serial row sequence
+   -------------------------------------------
+
+   generic
+      type T is digits <>;
+      type Array_Type is array (Positive range <>) of T;
+   procedure Save_Array_Column (File_Name : String; Arr : Array_Type) with
+     Pre => File_Name /= "";
+   -------------------------------------------
+   --Save array to file with column sequence
    -------------------------------------------
    
 private

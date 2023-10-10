@@ -4,6 +4,7 @@ with Ada.Numerics.Discrete_Random;
 with Ada.Numerics.Float_Random;
 with Ada.Numerics.Generic_Elementary_Functions;
 with Ada.Text_IO;
+with Ada.Characters.Latin_1;
 
 package body Utils is
    --------------------
@@ -88,9 +89,9 @@ package body Utils is
    end Make_Noise;
 
    --------------------
-   --Save_Array
+   --Save_Array_Row
    --------------------
-   procedure Save_Array (File_Name : String; Arr : Array_Type; Delim : Character := ' ') is
+   procedure Save_Array_Row (File_Name : String; Arr : Array_Type; Delim : Character := ' ') is
       package My_IO is new Ada.Text_IO.Float_IO (Num => T);
       F : Ada.Text_IO.File_Type;
    begin
@@ -105,6 +106,26 @@ package body Utils is
                     Exp  => 0);
          Ada.Text_IO.Put (File => F, Item => Delim);
       end loop;
-   end Save_Array;
+   end Save_Array_Row;
+   
+   --------------------
+   --Save_Array_Column
+   --------------------
+   procedure Save_Array_Column (File_Name : String; Arr : Array_Type) is
+      package My_IO is new Ada.Text_IO.Float_IO (Num => T);
+      F : Ada.Text_IO.File_Type;
+   begin
+      Ada.Text_IO.Create (File => F,
+                          Mode => Ada.Text_IO.Out_File,
+                          Name => File_Name);
+      for I of Arr loop
+         My_IO.Put (File => F,
+                    Item => I,
+                    Fore => 2,
+                    Aft  => 6,
+                    Exp  => 0);
+         Ada.Text_IO.Put (File => F, Item => Ada.Characters.Latin_1.CR);
+      end loop;
+   end Save_Array_Column;
    
 end Utils;

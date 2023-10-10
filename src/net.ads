@@ -66,6 +66,7 @@ package Net is
    procedure Set_Input_Bounds (This : in out Net; Min, Max : in Value_Type);
    
    function Net_Input (Stream : not null access Ada.Streams.Root_Stream_Type'Class) return Net;
+   function Weights_Tensors_Num (This : Net) return Positive;
    
 private
    --types declaration of values
@@ -118,6 +119,8 @@ private
    function Normolize_Input (This : in Net; Item : in Value_Type) return Value_Type is
      ((Item - This.Min_Value) * (1.0 - 0.0) / (This.Max_Value - This.Min_Value) + 0.0);
 
+   function Weights_Tensors_Num (This : Net) return Positive is
+      (This.Waights'Length);
    
 --   procedure Free is new Ada.Unchecked_Deallocation (Object => Value_Arr,
 --                                                     Name   => Values_Arr_Ref);

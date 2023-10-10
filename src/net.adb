@@ -4,7 +4,7 @@ with Ada.Numerics.Float_Random;
 with Ada.Numerics.Real_Arrays;
 with Ada.Streams.Stream_IO;
 with GNAT.Random_Numbers;
-
+with Ada.Text_IO;
 with Activate.Linear;
 with Activate.Logsig;
 with Activate.Tansig;
