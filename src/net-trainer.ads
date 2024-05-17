@@ -29,7 +29,7 @@ package Net.Trainer is
 
    package My_Vector is new Ada.Containers.Vectors (Index_Type   => Positive,
                                                     Element_Type => Value_Type);
-
+   use type Ada.Containers.Count_Type;
    type Result is record
       Train_errors : My_Vector.Vector;
       Test_Errors : My_Vector.Vector;
@@ -64,7 +64,8 @@ package Net.Trainer is
    function Train (This   : in out Net; Input : Input_Dataset; Target : Target_Dataset;
                    Params : in out Parameters; Train_Index : Train_Test_Index) return Result with
      Pre => Input'Length = Target'Length and Params.Epochs > 1,
-     Post => Params.Error < Value_Type'Last;
+     Post => Params.Error < Value_Type'Last and
+     Train'Result.Test_Errors.Length = Train'Result.Train_Errors.Length;
    ----------------------------------------------------------
    --This - training net
    --Input and Target - data for training
@@ -78,13 +79,13 @@ package Net.Trainer is
 
    generic
       type Array_Type is array (Positive range <>) of Value_Type;
-      function Make_Single_Input_Dataset (Arr : Array_Type) return Input_Dataset with
+   function Make_Single_Input_Dataset (Arr : Array_Type) return Input_Dataset with
      Post => Arr'Length = Make_Single_Input_Dataset'Result'Length;
    --make a single dataset of input
 
    generic
       type Array_Type is array (Positive range <>) of Value_Type;
-      function Make_Single_Target_Dataset (Arr : Array_Type) return Target_Dataset with
+   function Make_Single_Target_Dataset (Arr : Array_Type) return Target_Dataset with
      Post => Arr'Length = Make_Single_Target_Dataset'Result'Length;
    --make a single dataset of target
 
@@ -95,7 +96,8 @@ package Net.Trainer is
 
    procedure Save (Item : in Result) with
      Pre => not Item.Train_Errors.Is_Empty and
-     not Item.Test_Errors.Is_Empty;
+     not Item.Test_Errors.Is_Empty and
+     Item.Test_Errors.Length = Item.Train_Errors.Length;
    --save the training result to files "Train_errors" and "Test_Errors"
 
    procedure Save_Test (Arr : Target_Dataset) with

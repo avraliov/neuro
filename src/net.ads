@@ -19,6 +19,8 @@ package Net is
    package Activate_Pack is new Activate (Value_Type  => Value_Type,
                                           Matrix_Pack => Lay_Pack.Matrix_Pack);
 
+   type Neurons_Nums is array (Positive range <>) of Positive;
+   
    type Layer_Acc is access all Layer_Package.Layer;
    type Layers_Acc_Array is array (Positive range <>) of Layer_Acc;
    subtype Train_Type is Boolean;
@@ -31,6 +33,10 @@ package Net is
    type Error_Ep is array(Positive range <>) of Error_Type;
    
    use type Layer_Package.Activate_Pack.Derivative_Type;
+   
+   function Layers_Neurons_Nums  (This : in out Net) return Neurons_Nums with
+     Post => (for all I of Layers_Neurons_Nums'Result => I > 0);
+   
    procedure Make (This : in out Net; Layers : in Layers_Acc_Array) with
      Pre => This.Layers_Num = Layers'Length and 
      (if This.Train and (for all I in Layers'First + 1 .. Layers'Last => Layer_Package.Deriv(Layers (I).all) /= null) then True else False); 
@@ -93,7 +99,7 @@ private
    type Net (Layers_Num : Positive; Train : Train_Type) is tagged limited 
       record
          Values          : Values_Tensor (1 .. Layers_Num) := [others => null];
-         Waights         : Waights_Tensor (2 .. Layers_Num) := [others => null];
+         Weights         : Waights_Tensor (2 .. Layers_Num) := [others => null];
          Biases          : Biases_Tensor (2 .. Layers_Num) := [others => null];
          Activates       : Activate_Arr (2 .. Layers_Num) := [others => null];
          Post_Procedures : Post_Proc (1 .. Layers_Num) := [others => null];
@@ -120,7 +126,7 @@ private
      ((Item - This.Min_Value) * (1.0 - 0.0) / (This.Max_Value - This.Min_Value) + 0.0);
 
    function Weights_Tensors_Num (This : Net) return Positive is
-      (This.Waights'Length);
+      (This.Weights'Length);
    
 --   procedure Free is new Ada.Unchecked_Deallocation (Object => Value_Arr,
 --                                                     Name   => Values_Arr_Ref);

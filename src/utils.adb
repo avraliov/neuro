@@ -125,9 +125,37 @@ package body Utils is
                     Fore => 2,
                     Aft  => 6,
                     Exp  => 0);
-         Ada.Text_IO.Put (File => F, Item => Ada.Characters.Latin_1.CR);
+         Ada.Text_IO.New_Line(File => F);
       end loop;
       Ada.Text_IO.Close (File => F);
    end Save_Array_Column;
+
+   --------------------
+   --Min
+   --------------------
+   function Min (Arr : Array_Type) return T is
+   begin
+      return Result : T := T'Last do
+         for I of Arr loop
+            if I < Result then
+               Result := I;
+            end if;
+         end loop;
+      end return;
+   end Min;
+
+   --------------------
+   --Max
+   --------------------
+   function Max (Arr : Array_Type) return T is
+   begin
+      return Result : T := T'First do
+         for I of Arr loop
+            if I > Result then
+               Result := I;
+            end if;
+         end loop;
+      end return;
+   end Max;
    
 end Utils;

@@ -92,6 +92,8 @@ package body Net.Trainer is
                                 Exp  => 0);
             Ada.Text_IO.Put_Line (Item => "Total time: " &
                                     Ada.Strings.Fixed.Trim (Source => Dur_Str, Side   => Ada.Strings.Left) & " s.");
+--            Ada.Text_IO.Put_Line (Item => "Test_Errors.Length=" & Res.Test_Errors.Length'Image);
+--            Ada.Text_IO.Put_Line (Item => "Train_Errors.Length=" & Res.Train_Errors.Length'Image);
          end;
       end return;
    end Train;
@@ -132,7 +134,7 @@ package body Net.Trainer is
             Err_Sum : Value_Type := 0.0;
          begin
             for I of Errors_Out loop
-               Err_Sum := Err_Sum + (0.5 * (I * I));
+               Err_Sum := @ + (0.5 * (I * I));
             end loop;
             Err := Err_Sum / Error_Type (Errors_Out'Length);
          end;
@@ -155,7 +157,9 @@ package body Net.Trainer is
                     Fore => 2,
                     Aft  => 6,
                     Exp  => 0);
+         Ada.Text_IO.New_Line(File => F);
       end loop;
+      Ada.Text_IO.Flush(File => F);
       Ada.Text_IO.Close (File => F);
 
       Ada.Text_IO.Create (File => F,
@@ -167,7 +171,10 @@ package body Net.Trainer is
                     Fore => 2,
                     Aft  => 6,
                     Exp  => 0);
+         Ada.Text_IO.New_Line(File => F);
       end loop;
+      Ada.Text_IO.Flush(File => F);
+      Ada.Text_IO.Close (File => F);
    end Save;
 
 
@@ -188,8 +195,11 @@ package body Net.Trainer is
                        Fore => 2,
                        Aft  => 6,
                        Exp  => 0);
+            Ada.Text_IO.New_Line (File => F);
          end loop;
       end loop;
+      Ada.Text_IO.Flush(File => F);
+      Ada.Text_IO.Close (File => F);
    end Save_Test;
 
    -----------
@@ -240,7 +250,7 @@ package body Net.Trainer is
       Deltas_For_Hidden_Layers :
       for I in reverse This.Deltas'First .. This.Deltas'Last - 1 loop----------------------
          declare
-            W_T    : constant Layer_Package.Matrix_Pack.Real_Matrix := Layer_Package.Matrix_Pack.Transpose (This.Waights (I + 1).all);
+            W_T    : constant Layer_Package.Matrix_Pack.Real_Matrix := Layer_Package.Matrix_Pack.Transpose (This.Weights (I + 1).all);
             Errors : constant Layer_Package.Matrix_Pack.Real_Vector := W_T * This.Deltas (I + 1).all;
          begin
             for J in This.Deltas (I).all'Range loop
@@ -250,13 +260,13 @@ package body Net.Trainer is
       end loop Deltas_For_Hidden_Layers;
 
       Waights_Update :
-      for W in reverse This.Waights'Range loop
-         for I in This.Waights (W)'Range (1) loop
-            for J in This.Waights (W)'Range (2) loop
+      for W in reverse This.Weights'Range loop
+         for I in This.Weights (W)'Range (1) loop
+            for J in This.Weights (W)'Range (2) loop
                declare
                   W_D : constant Value_Type := Value_Type (Lr) * This.Deltas (W) (I) * This.Values (W - 1) (J);
                begin
-                  This.Waights (W) (I, J) := @ - W_D;
+                  This.Weights (W) (I, J) := @ - W_D;
                   null;
                end;
             end loop;

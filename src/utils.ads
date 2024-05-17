@@ -58,6 +58,26 @@ package Utils is
    -------------------------------------------
    --Save array to file with column sequence
    -------------------------------------------
+
+   generic
+      type T is digits <>;
+      type Array_Type is array (Positive range <>) of T;
+   function Min (Arr : Array_Type) return T with
+     Pre => Arr'Length > 0,
+     Post => Min'Result < T'Last;
+   -------------------------------------------
+   --return min value of sequence
+   -------------------------------------------
+
+   generic
+      type T is digits <>;
+      type Array_Type is array (Positive range <>) of T;
+   function Max (Arr : Array_Type) return T with
+     Pre => Arr'Length > 0,
+     Post => Max'Result > T'First;
+   -------------------------------------------
+   --return max value of sequence
+   -------------------------------------------
    
 private
    generic

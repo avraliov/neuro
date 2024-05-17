@@ -3,6 +3,7 @@ pragma Ada_2022;
 with Ada.Numerics.Float_Random;
 with Ada.Numerics.Real_Arrays;
 with Ada.Streams.Stream_IO;
+with Ada.Numerics.Elementary_Functions;
 with GNAT.Random_Numbers;
 with Ada.Text_IO;
 with Activate.Linear;
@@ -51,9 +52,9 @@ package body Net is
          --Get function generate normal distributed value in -1 .. 1 and
          --recalculate it in 0 .. 1 by formula (nd * diviation + mean)
          --if mean is 0.5. If mean is 0.0 then in -1 .. 1
-         function Get ( Mean, Deviation : Float) return Value_Type with
+         function Get_Uniform ( Mean, Deviation : Float) return Value_Type with
            Pre => Mean + Deviation in -1.0 .. 1.0 and Deviation /= 0.0,
-           Post => (Get'Result in -1.0 .. 1.0)
+           Post => (Get_Uniform'Result in -1.0 .. 1.0)
          is
             use GNAT.Random_Numbers;
          begin
@@ -67,24 +68,47 @@ package body Net is
                         exit;
                      end if;
                   end loop;
-                  Tmp := Tmp * Deviation + Mean;
+                  Tmp := @ * Deviation + Mean;
                   Result := Value_Type (Tmp);
                end;
             end return;
-         end Get;
+         end Get_Uniform;
+         
+         function Get_Gaussian ( Mean, Deviation : Float) return Value_Type with
+           Pre => Mean + Deviation in -1.0 .. 1.0 and Deviation /= 0.0
+--           Post => (Get_Gaussian'Result in -1.0 .. 1.0)
+         is
+            use Ada.Numerics.Float_Random;
+            use Ada.Numerics.Elementary_Functions;
+            
+            Generator : Ada.Numerics.Float_Random.Generator;
+         begin
+            Ada.Numerics.Float_Random.Reset (Gen => Generator);
+            return Result : Value_Type do
+--               loop
+                  Result := Value_Type (Mean + (Deviation * Sqrt (-2.0 *
+                                          Log (Random (Generator), 10.0)) *
+                                            Cos (2.0 * Ada.Numerics.Pi * Random (Generator))));
+                  --  if Result in Value_Type(Mean - Deviation) .. Value_Type(Mean + Deviation) then
+                  --     exit;
+                  --  end if;
+--               end loop;
+            end return;
+         end Get_Gaussian;
+
       begin
          GNAT.Random_Numbers.Reset (Gen => My_Generator);
          loop
             select
                accept Init_Gaussian (Item : in out Layer_Waights) do
-                  Item := [others => (others => Get (Mean => 0.5, Deviation => 0.5))];
+                  Item := [others => (others => Get_Gaussian (Mean => 0.0, Deviation => 0.5))];
                end Init_Gaussian;
             or
                accept Init_Xavier (Item : in out Layer_Waights; In_Num, Out_Num : in Natural) do
                   declare
                      Deviation : Float := 2.0 / (Float(In_Num) + Float(Out_Num));
                   begin
-                  Item := (others => (others => Get (Mean => 0.0, Deviation => Deviation)));
+                  Item := (others => (others => Get_Uniform (Mean => 0.0, Deviation => Deviation)));
                   end;
                end Init_Xavier;
             or
@@ -92,7 +116,7 @@ package body Net is
                   declare
                      Deviation : Float := 2.0 / (Float (In_Num) + Float (Out_Num));
                   begin
-                     Item := (others => Get (Mean => 0.0, Deviation => Deviation));
+                     Item := (others => Get_Uniform (Mean => 0.0, Deviation => Deviation));
                   end;
                end Init_Biases;
             or 
@@ -101,7 +125,7 @@ package body Net is
          end loop;
       end Tensor_Randomizer;
 
-      type Task_Array_Base_Type is array (This.Waights'Range) of Tensor_Randomizer;
+      type Task_Array_Base_Type is array (This.Weights'Range) of Tensor_Randomizer;
       subtype Task_Array_Type is Task_Array_Base_Type with
         Dynamic_Predicate => Task_Array_Type'Length <= 8;
       --type for waights initialization tasks
@@ -174,16 +198,16 @@ package body Net is
       is
          Idx : Positive := This.Values'First;
       begin
-         for I in This.Waights'Range loop
-            This.Waights (I) := new Layer_Waights (1 .. Layers (Idx + 1).Num, 1 .. Layers (Idx).Num);
+         for I in This.Weights'Range loop
+            This.Weights (I) := new Layer_Waights (1 .. Layers (Idx + 1).Num, 1 .. Layers (Idx).Num);
             case (This.Activates_Enum (I)) is
                when Layer_Package.Activate_Pack.Log | Layer_Package.Activate_Pack.Lin=>
-                  Task_Array (I).Init_Xavier (Item   => This.Waights (I).all, 
+                  Task_Array (I).Init_Xavier (Item   => This.Weights (I).all, 
                                               In_Num => This.Values (I - 1).all'Length,
                                               Out_Num => (if I + 1 in This.Values'Range then This.Values (I + 1).all'Length else 0));
 --                  Task_Array (I).Init_Gaussian (Item => This.Waights (I).all);
                when others =>
-                  Task_Array (I).Init_Gaussian (Item => This.Waights (I).all);
+                  Task_Array (I).Init_Gaussian (Item => This.Weights (I).all);
             end case;
             --Task_Array (I).Init_Gaussian (Item => This.Waights (I).all);
             Idx := Idx + 1;
@@ -240,6 +264,9 @@ package body Net is
 --      end loop;
 --   end Finalize;
 
+   ---------------
+   -- Feed_Forward
+   ---------------
    procedure Feed_Forward (This : in out Net; Input : in Input_Vector; Pre_Post_Routine : in Boolean)
    is
       use type Layer_Package.Matrix_Pack.Real_Vector;
@@ -252,12 +279,12 @@ package body Net is
       end loop Normolize_Input;
       -----------------
       This.Values (This.Values'First).all := Normolized_Input;
-      for Values_Tensor_Index in This.Waights'Range loop
+      for Values_Tensor_Index in This.Weights'Range loop
          declare
             Value_Idx : Positive := 1;
             Result_Vector : Layer_Package.Matrix_Pack.Real_Vector (1 .. This.Values (Values_Tensor_Index)'Length) := (others => Value_Type'Last);
          begin
-            Result_Vector := (This.Waights (Values_Tensor_Index).all * This.Values (Values_Tensor_Index - 1).all) + This.Biases (Values_Tensor_Index).all;
+            Result_Vector := (This.Weights (Values_Tensor_Index).all * This.Values (Values_Tensor_Index - 1).all) + This.Biases (Values_Tensor_Index).all;
             Take_Derivation :
             for I of This.Values (Values_Tensor_Index).all loop
                begin
@@ -278,6 +305,9 @@ package body Net is
    end Feed_Forward;
 
 
+   -----------------
+   -- Is_Input_Valid
+   -----------------
    function Is_Input_Valid (This : in out Net; Vector : in Input_Vector) return Boolean is
    begin
       return Result : Boolean do
@@ -286,6 +316,9 @@ package body Net is
       end return;
    end Is_Input_Valid;
 
+   ------------------
+   -- Is_Target_Valid
+   ------------------
    function Is_Target_Valid (This : in out Net; Vector : in Target_Vector) return Boolean is
    begin
       return Result : Boolean do
@@ -300,12 +333,15 @@ package body Net is
       return Result : Boolean := False do
          Result := 
            (for all I of This.Values => I /= null) and then
-           (for all I of This.Waights => I /= null) and then
+           (for all I of This.Weights => I /= null) and then
            (for all I of This.Biases => I /= null) and then
            (for all I of This.Activates => I /= null);
       end return;
    end Created;
    
+   -------------
+   -- Get_Result
+   -------------
    function Get_Result (This : in out Net) return Target_Vector is
    begin
       return Result : constant Target_Vector := This.Values (This.Values'Last).all do
@@ -328,14 +364,17 @@ package body Net is
       Ada.Streams.Stream_IO.Close (File => F);
    end Save;
 
+   -------------
+   -- Net_Output
+   -------------
    procedure Net_Output (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Item : in Net) is
    begin
       Positive'Write (Stream, Item.Layers_Num);
 
       --waights writing
-      Waights_Tensor'Output (Stream, Item.Waights);
-      Waights_Tensor'Write (Stream, Item.Waights);
-      for I of Item.Waights loop
+      Waights_Tensor'Output (Stream, Item.Weights);
+      Waights_Tensor'Write (Stream, Item.Weights);
+      for I of Item.Weights loop
          Layer_Waights'Output (Stream, I.all);
          Layer_Waights'Write (Stream, I.all);
       end loop;
@@ -353,15 +392,18 @@ package body Net is
       Activate_Enum_Arr'Write (Stream, Item.Activates_Enum);
    end Net_Output;
    
+   ------------
+   -- Net_Input
+   ------------
    function Net_Input (Stream : not null access Ada.Streams.Root_Stream_Type'Class) return Net is
       Layers_Num : Positive;
    begin
       Positive'Read (Stream, Layers_Num);
       return Res_Net : Net (Layers_Num, False) do
          --waights read
-         Res_Net.Waights := Waights_Tensor'Input (Stream);
-         Waights_Tensor'Read (Stream, Res_Net.Waights);
-         for I of Res_Net.Waights loop
+         Res_Net.Weights := Waights_Tensor'Input (Stream);
+         Waights_Tensor'Read (Stream, Res_Net.Weights);
+         for I of Res_Net.Weights loop
             declare
                Local_Layer_W : Layer_Waights := Layer_Waights'Input (Stream);
             begin
@@ -413,7 +455,7 @@ package body Net is
             First_Iter : Boolean := True;
             Idx        : Positive := 1;
          begin
-            for I of Res_Net.Waights loop
+            for I of Res_Net.Weights loop
                if First_Iter then
                   Res_Net.Values (1) := new Values_Arr (I'Range (2));
                   Res_Net.Values (1).all := (others => 0.0);
@@ -431,6 +473,9 @@ package body Net is
       end return; 
    end Net_Input;
    
+   -------------------
+   -- Load
+   -------------------
    function Load (Name : String := "") return Net is
       F : Ada.Streams.Stream_IO.File_Type;
       S : Ada.Streams.Stream_IO.Stream_Access;
@@ -464,4 +509,14 @@ package body Net is
    begin
      return This.Min_Value < This.Max_Value;
    end Is_Input_Bounds;
+   
+   ----------------------
+   -- Layers_Neurons_Nums
+   ----------------------
+   function Layers_Neurons_Nums (This : in out Net) return Neurons_Nums is
+   begin
+      return Result : Neurons_Nums := [for I of This.Values => I.all'Length] do
+         null;
+      end return;
+   end Layers_Neurons_Nums;
 end Net;
