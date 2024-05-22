@@ -50,7 +50,7 @@ package body Net is
          My_Generator : GNAT.Random_Numbers.Generator;
 
          --Get function generate normal distributed value in -1 .. 1 and
-         --recalculate it in 0 .. 1 by formula (nd * diviation + mean)
+         --recalculate it in 0 .. 1 by formula (nd * deviation + mean)
          --if mean is 0.5. If mean is 0.0 then in -1 .. 1
          function Get_Uniform ( Mean, Deviation : Float) return Value_Type with
            Pre => Mean + Deviation in -1.0 .. 1.0 and Deviation /= 0.0,
@@ -75,8 +75,8 @@ package body Net is
          end Get_Uniform;
          
          function Get_Gaussian ( Mean, Deviation : Float) return Value_Type with
-           Pre => Mean + Deviation in -1.0 .. 1.0 and Deviation /= 0.0
---           Post => (Get_Gaussian'Result in -1.0 .. 1.0)
+           Pre => Mean + Deviation in -1.0 .. 1.0 and Deviation /= 0.0,
+           Post => (Get_Gaussian'Result in -1.0 .. 1.0)
          is
             use Ada.Numerics.Float_Random;
             use Ada.Numerics.Elementary_Functions;
@@ -85,14 +85,14 @@ package body Net is
          begin
             Ada.Numerics.Float_Random.Reset (Gen => Generator);
             return Result : Value_Type do
---               loop
-                  Result := Value_Type (Mean + (Deviation * Sqrt (-2.0 *
-                                          Log (Random (Generator), 10.0)) *
-                                            Cos (2.0 * Ada.Numerics.Pi * Random (Generator))));
-                  --  if Result in Value_Type(Mean - Deviation) .. Value_Type(Mean + Deviation) then
-                  --     exit;
-                  --  end if;
---               end loop;
+               Result := Value_Type (Mean + (Deviation * Sqrt (-2.0 *
+                                       Log (Random (Generator), 10.0)) *
+                                         Cos (2.0 * Ada.Numerics.Pi * Random (Generator))));
+               if Result > 1.0 then 
+                  Result := 1.0;
+               elsif Result < -1.0 then
+                  Result := -1.0;
+                end if;
             end return;
          end Get_Gaussian;
 
